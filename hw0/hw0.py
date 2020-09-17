@@ -31,7 +31,25 @@ def split_into_train_and_test(x_all_LF, frac_test=0.5, random_state=None):
     random_state : np.random.RandomState instance or integer or None
         If int, will create RandomState instance with provided value as seed
         If None, defaults to current numpy random number generator np.random.
+    '''
 
+    if random_state is None:
+        random_state = np.random
+    elif isinstance(random_state, int):
+        random_state = np.random.RandomState(random_state)
+
+    x_test_NF = x_all_LF.copy()
+    random_state.shuffle(x_test_NF)
+
+
+    test_dimensions = int(np.ceil(x_all_LF.shape[0] * frac_test))
+
+    x_test_NF_new = x_test_NF[x_test_NF.shape[0] - test_dimensions: :, :]
+    x_train_MF = x_test_NF[0: x_test_NF.shape[0] - test_dimensions, :]
+
+    return x_train_MF, x_test_NF_new
+
+    '''
     Returns
     -------
     x_train_MF : 2D np.array, shape = (n_train_examples, n_features) (M, F)
@@ -49,43 +67,64 @@ def split_into_train_and_test(x_all_LF, frac_test=0.5, random_state=None):
 
     Examples
     --------
-    >>> x_LF = np.eye(10)
-    >>> xcopy_LF = x_LF.copy() # preserve what input was before the call
-    >>> train_MF, test_NF = split_into_train_and_test(
-    ...     x_LF, frac_test=0.201, random_state=np.random.RandomState(0))
-    >>> train_MF.shape
-    (7, 10)
-    >>> test_NF.shape
-    (3, 10)
-    >>> print(train_MF)
-    [[0. 0. 1. 0. 0. 0. 0. 0. 0. 0.]
-     [0. 0. 0. 0. 0. 0. 0. 0. 1. 0.]
-     [0. 0. 0. 0. 1. 0. 0. 0. 0. 0.]
-     [0. 0. 0. 0. 0. 0. 0. 0. 0. 1.]
-     [0. 1. 0. 0. 0. 0. 0. 0. 0. 0.]
-     [0. 0. 0. 0. 0. 0. 1. 0. 0. 0.]
-     [0. 0. 0. 0. 0. 0. 0. 1. 0. 0.]]
-    >>> print(test_NF)
-    [[0. 0. 0. 1. 0. 0. 0. 0. 0. 0.]
-     [1. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
-     [0. 0. 0. 0. 0. 1. 0. 0. 0. 0.]]
 
-    ## Verify that input array did not change due to function call
-    >>> np.allclose(x_LF, xcopy_LF)
-    True
 
     References
     ----------
     For more about RandomState, see:
     https://stackoverflow.com/questions/28064634/random-state-pseudo-random-numberin-scikit-learn
     '''
-    if random_state is None:
-        random_state = np.random
-    # TODO fixme
-    return None, None
+
+# x_LF = np.eye(10)
+# xcopy_LF = x_LF.copy() # preserve what input was before the call
+# train_MF, test_NF = split_into_train_and_test(x_LF, frac_test=0.201, random_state=np.random.RandomState(0))
+# train_MF.shape
+# # (7, 10)
+# test_NF.shape
+# # (3, 10)
+# print(train_MF)
+# # [[0. 0. 1. 0. 0. 0. 0. 0. 0. 0.]
+# #  [0. 0. 0. 0. 0. 0. 0. 0. 1. 0.]
+# #  [0. 0. 0. 0. 1. 0. 0. 0. 0. 0.]
+# #  [0. 0. 0. 0. 0. 0. 0. 0. 0. 1.]
+# #  [0. 1. 0. 0. 0. 0. 0. 0. 0. 0.]
+# #  [0. 0. 0. 0. 0. 0. 1. 0. 0. 0.]
+# #  [0. 0. 0. 0. 0. 0. 0. 1. 0. 0.]]
+# print(test_NF)
+# # [[0. 0. 0. 1. 0. 0. 0. 0. 0. 0.]
+# #  [1. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+# #  [0. 0. 0. 0. 0. 1. 0. 0. 0. 0.]]
+#
+# ## Verify that input array did not change due to function call
+# np.allclose(x_LF, xcopy_LF)
+# # True
+
+def euclidean_distance(v1, v2):
+        v1,v2 =np.array(v1), np.array(v2)
+        distance = 0.0
+        for i in range(len(v1)):
+            distance +=(v1[i] - v2[i])**2
+        return np.sqrt(distance)
 
 
 def calc_k_nearest_neighbors(data_NF, query_QF, K=1):
+
+    array_3d = np.empty([query_QF.shape[0], K, data_NF.shape[1]])
+    for x in range(query_QF.shape[0]):
+        print("PROCESSING QUERY:", x)
+        new_query_results = np.empty([K, data_NF.shape[1]])
+        new_query_distance = np.empty([data_NF.shape[0], 2])
+        for i in range(data_NF.shape[0]):
+            new_query_distance[i][0] = euclidean_distance(query_QF[x], data_NF[i])
+            print("distance", new_query_distance[i][0], "index", i)
+            new_query_distance[i][1] = i
+        new_query_distance_1 = np.zeros((data_NF.shape[0],2))
+        new_query_distance_1 = new_query_distance[new_query_distance[:,0].argsort(kind='mergesort')]
+        print(new_query_distance_1)
+        for i in range(K):
+            array_3d[x][i] = data_NF[int(new_query_distance_1[i,1])]
+
+    return array_3d
     ''' Compute and return k-nearest neighbors under Euclidean distance
 
     Args
@@ -106,32 +145,27 @@ def calc_k_nearest_neighbors(data_NF, query_QF, K=1):
 
     Examples
     --------
-    >>> data_NF = np.asarray([
-    ...     [1, 0],
-    ...     [0, 1],
-    ...     [-1, 0],
-    ...     [0, -1]])
-    >>> query_QF = np.asarray([
-    ...     [0.9, 0],
-    ...     [0, -0.9]])
-    >>> neighb_QKF = calc_k_nearest_neighbors(data_NF, query_QF, K=1)
-    >>> neighb_QKF[0]
-    array([[1., 0.]])
-    >>> neighb_QKF[1]
-    array([[ 0., -1.]])
 
-    # Find 3 nearest neighbors
-    >>> neighb_QKF = calc_k_nearest_neighbors(data_NF, query_QF, K=3)
-    >>> neighb_QKF.shape
-    (2, 3, 2)
-    >>> neighb_QKF[0]
-    array([[ 1.,  0.],
-           [ 0.,  1.],
-           [ 0., -1.]])
-    >>> neighb_QKF[1]
-    array([[ 0., -1.],
-           [ 1.,  0.],
-           [-1.,  0.]])
     '''
-    # TODO fixme
-    return None
+# data_NF = np.vstack([ np.eye(4), 1.4 * np.eye(4), 0.8 * np.eye(4)])
+# query_QF = np.asarray([[0, 0, 0, 1.0]])
+# print(calc_k_nearest_neighbors(data_NF, query_QF, 3))
+# print(data_NF)
+
+
+# data_NF = np.asarray([[1, 0], [0, 1], [-1, 0], [0, -1]])
+# query_QF = np.asarray([[0.9, 0], [0, -0.9]])
+# neighb_QKF = calc_k_nearest_neighbors(data_NF, query_QF, K=1)
+# print(neighb_QKF[0])
+# # array([[1., 0.]])
+# print(neighb_QKF[1])
+# .array([[ 0., -1.]])
+
+#     # Find 3 nearest neighbors
+# neighb_QKF = calc_k_nearest_neighbors(data_NF, query_QF, K=3)
+# print(neighb_QKF.shape())
+# # shape(2, 3, 2)
+# print(neighb_QKF[0])
+# # array([[ 1.,  0.], [ 0.,  1.], [ 0., -1.]])
+# print(neighb_QKF[1])
+# # array([[ 0., -1.], [ 1.,  0.], [-1.,  0.]]))
