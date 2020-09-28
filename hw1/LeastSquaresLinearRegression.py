@@ -36,7 +36,7 @@ class LeastSquaresLinearRegressor(object):
 
         Returns
         -------
-        Nothing. 
+        Nothing.
 
         Post-Condition
         --------------
@@ -47,12 +47,25 @@ class LeastSquaresLinearRegressor(object):
         Notes
         -----
         The least-squares optimization problem is:
-        
+
         .. math:
             \min_{w \in \mathbb{R}^F, b \in \mathbb{R}}
                 \sum_{n=1}^N (y_n - b - \sum_f x_{nf} w_f)^2
         '''
         N, F = x_NF.shape
+        print(x_NF)
+        x_tilde_N2 = np.hstack([x_NF, np.ones((N, 1))]);
+        print(x_tilde_N2)
+        xTx_22 = np.dot(x_tilde_N2.T, x_tilde_N2)
+        print(xTx_22)
+        inv_xTx_22 = np.linalg.inv(xTx_22)
+        print(inv_xTx_22)
+        theta_G = np.dot(inv_xTx_22, np.dot(x_tilde_N2.T, y_N[:,np.newaxis]))
+        print(theta_G)
+        self.w_F = theta_G[:-1, 0]
+        self.b = theta_G[-1]
+        print(self.w_F)
+        print(self.b)
         pass # TODO
 
 
@@ -77,26 +90,27 @@ class LeastSquaresLinearRegressor(object):
             Each value is the predicted scalar for one example
         '''
         # TODO FIX ME
-        return np.asarray([0.0])
+        return np.dot(x_MF, self.w_F) + self.b
 
 
 
 
 
-if __name__ == '__main__':
-    # Simple example use case
-    # With toy dataset with N=100 examples
-    # created via a known linear regression model plus small noise
-
-    prng = np.random.RandomState(0)
-    N = 100
-
-    true_w_F = np.asarray([1.1, -2.2, 3.3])
-    true_b = 0.0
-    x_NF = prng.randn(N, 3)
-    y_N = true_b + np.dot(x_NF, true_w_F) + 0.03 * prng.randn(N)
-
-    linear_regr = LeastSquaresLinearRegressor()
-    linear_regr.fit(x_NF, y_N)
-
-    yhat_N = linear_regr.predict(x_NF)
+# if __name__ == '__main__':
+#     # Simple example use case
+#     # With toy dataset with N=100 examples
+#     # created via a known linear regression model plus small noise
+#
+#     prng = np.random.RandomState(0)
+#     N = 100
+#
+#     true_w_F = np.asarray([1.1, -2.2, 3.3])
+#     true_b = 0.0
+#     x_NF = prng.randn(N, 3)
+#     y_N = true_b + np.dot(x_NF, true_w_F) + 0.03 * prng.randn(N)
+#
+#     linear_regr = LeastSquaresLinearRegressor()
+#     linear_regr.fit(x_NF, y_N)
+#
+#     yhat_N = linear_regr.predict(x_NF)
+#     print(yhat_N)
