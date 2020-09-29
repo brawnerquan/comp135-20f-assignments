@@ -25,7 +25,9 @@ def calc_mean_squared_error(y_N, yhat_N):
     >>> calc_mean_squared_error(y_N, yhat_N)
     1.3333333333333333
     '''
-
+    
+    if yhat_N.shape[0] == 0:
+        return 0
     return np.sum((yhat_N - y_N)**2)/yhat_N.shape[0]
 
 # y_N = np.asarray([-2, 0, 2], dtype=np.float64)

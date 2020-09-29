@@ -1,5 +1,15 @@
 import numpy as np
 
+
+import os
+import warnings
+
+import sklearn.preprocessing
+import sklearn.pipeline
+import sklearn.linear_model
+import sklearn.neighbors
+import sklearn.model_selection
+
 from performance_metrics import calc_mean_squared_error
 
 
@@ -78,8 +88,8 @@ def train_models_and_calc_scores_for_n_fold_cv(
             current_fold_y[j] = y_N[train[i][j]]
         print("FOLD: ", current_fold)
         for k in range(TL):
-            to_predict[k] = x_NF[train[i][k]]
-            to_predict_y[k] = y_N[train[i][k]]
+            to_predict[k] = x_NF[test[i][k]]
+            to_predict_y[k] = y_N[test[i][k]]
         estimator.fit(current_fold, current_fold_y)
         yhat_train = estimator.predict(current_fold)
         print(yhat_train)
@@ -173,7 +183,7 @@ def make_train_and_test_row_ids_for_n_fold_cv(
     # print(test_ids_per_fold)
     train_ids_per_fold = list();
     for i in range(len(test_ids_per_fold)):
-        train_ids_per_fold.append(list(set(row_ids) ^ set(test_ids_per_fold[i])))
+        train_ids_per_fold.append(np.array(list(set(row_ids) ^ set(test_ids_per_fold[i]))))
     # print(train_ids_per_fold)
     #hstack
     # TODO establish the row ids that belong to each fold's
@@ -182,38 +192,51 @@ def make_train_and_test_row_ids_for_n_fold_cv(
 
     return train_ids_per_fold, test_ids_per_fold
 
+def make_poly_linear_regr_pipeline(degree=1):
+    pipeline = sklearn.pipeline.Pipeline(
+        steps=[
+         ('rescaler', sklearn.preprocessing.MinMaxScaler()),
+         ('poly_transformer', sklearn.preprocessing.PolynomialFeatures(degree=degree, include_bias=False)),
+         ('linear_regr', sklearn.linear_model.LinearRegression()),
+        ])
+
+    # Return the constructed pipeline
+    # We can treat it as if it has a 'regression' API
+    # e.g. a fit and a predict method
+    return pipeline
 
 
-N = 47
-n_folds = 9
-tr_ids_per_fold, te_ids_per_fold = (make_train_and_test_row_ids_for_n_fold_cv(N, n_folds))
-len(tr_ids_per_fold)
-# 3
-
-# Count of items in training sets
-print(np.sort([len(tr) for tr in tr_ids_per_fold]))
-# array([7, 7, 8])
-
-# Count of items in the test sets
-print(np.sort([len(te) for te in te_ids_per_fold]))
-# array([3, 4, 4])
-
-# Test ids should uniquely cover the interval [0, N)
-print(np.sort(np.hstack([te_ids_per_fold[f] for f in range(n_folds)])))
-#array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10])
-
-# Train ids should cover the interval [0, N) TWICE
-print(np.sort(np.hstack([tr_ids_per_fold[f] for f in range(n_folds)])))
-# array([ 0,  0,  1,  1,  2,  2,  3,  3,  4,  4,  5,  5,  6,  6,  7,  7,  8,
-    # 8,  9,  9, 10, 10])
+# N = 47
+# n_folds = 9
+# tr_ids_per_fold, te_ids_per_fold = (make_train_and_test_row_ids_for_n_fold_cv(N, n_folds))
+# len(tr_ids_per_fold)
+# # 3
+# print("TRAINING IDS: ", tr_ids_per_fold)
+# print("TEST IDS: ", te_ids_per_fold)
+# # Count of items in training sets
+# print(np.sort([len(tr) for tr in tr_ids_per_fold]))
+# # array([7, 7, 8])
+#
+# # Count of items in the test sets
+# print(np.sort([len(te) for te in te_ids_per_fold]))
+# # array([3, 4, 4])
+#
+# # Test ids should uniquely cover the interval [0, N)
+# print(np.sort(np.hstack([te_ids_per_fold[f] for f in range(n_folds)])))
+# #array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10])
+#
+# # Train ids should cover the interval [0, N) TWICE
+# print(np.sort(np.hstack([tr_ids_per_fold[f] for f in range(n_folds)])))
+# # array([ 0,  0,  1,  1,  2,  2,  3,  3,  4,  4,  5,  5,  6,  6,  7,  7,  8,
+#     # 8,  9,  9, 10, 10])
 
 
 
 # Create simple dataset of N examples where y given x
 # is perfectly explained by a linear regression model
-# N = 101
+# N = 10
 # n_folds = 7
-# x_N3 = np.random.RandomState(0).rand(N, 3)
+# x_N3 = np.random.RandomState(0).rand(N, 10)
 # y_N = np.dot(x_N3, np.asarray([1., -2.0, 3.0])) - 1.3337
 # print(y_N.shape)
 # # (101,)

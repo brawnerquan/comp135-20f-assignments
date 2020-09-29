@@ -53,16 +53,15 @@ class LeastSquaresLinearRegressor(object):
                 \sum_{n=1}^N (y_n - b - \sum_f x_{nf} w_f)^2
         '''
         N, F = x_NF.shape
-        print(x_NF)
+        # print(x_NF)
         x_tilde_N2 = np.hstack([x_NF, np.ones((N, 1))]);
-        print(x_tilde_N2)
+        # print(x_tilde_N2)
         xTx_22 = np.dot(x_tilde_N2.T, x_tilde_N2)
-        print(xTx_22)
-        inv_xTx_22 = np.linalg.inv(xTx_22)
-        print(inv_xTx_22)
-        theta_G = np.dot(inv_xTx_22, np.dot(x_tilde_N2.T, y_N[:,np.newaxis]))
-        print(theta_G)
-        self.w_F = theta_G[:-1, 0]
+        # print(xTx_22)
+        # print(inv_xTx_22)
+        theta_G = np.linalg.solve(xTx_22, np.dot(x_tilde_N2.T, y_N))
+        # print(theta_G)
+        self.w_F = theta_G[:-1]
         self.b = theta_G[-1]
         print(self.w_F)
         print(self.b)
@@ -90,12 +89,18 @@ class LeastSquaresLinearRegressor(object):
             Each value is the predicted scalar for one example
         '''
         # TODO FIX ME
-        return np.dot(x_MF, self.w_F) + self.b
+        # print("X_MF SHAPE: ", x_MF.shape)
+        yhat_N = np.dot(x_MF, self.w_F)
+        # print("YHAT:", yhat_N)
+        yhat_N = yhat_N + self.b
+        # print("YHAT:", yhat_N)
+        # print("YHATSHAPE: ", yhat_N.shape)
+        return yhat_N
 
 
 
 
-
+#
 # if __name__ == '__main__':
 #     # Simple example use case
 #     # With toy dataset with N=100 examples
