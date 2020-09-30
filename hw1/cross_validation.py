@@ -72,9 +72,9 @@ def train_models_and_calc_scores_for_n_fold_cv(
     # e.g. ... = make_train_and_test_row_ids_for_n_fold_cv(...)
     train, test = (make_train_and_test_row_ids_for_n_fold_cv(x_NF.shape[0], n_folds, random_state))
     #get training set from fold
-    print(train)
-    print(x_NF.shape)
-    print(test)
+    # print(train)
+    # print(x_NF.shape)
+    # print(test)
     for i in range(n_folds):
         FL = len(train[i])
         F = x_NF.shape[1]
@@ -86,15 +86,15 @@ def train_models_and_calc_scores_for_n_fold_cv(
         for j in range(FL):
             current_fold[j] = x_NF[train[i][j]]
             current_fold_y[j] = y_N[train[i][j]]
-        print("FOLD: ", current_fold)
+        # print("FOLD: ", current_fold)
         for k in range(TL):
             to_predict[k] = x_NF[test[i][k]]
             to_predict_y[k] = y_N[test[i][k]]
         estimator.fit(current_fold, current_fold_y)
         yhat_train = estimator.predict(current_fold)
-        print(yhat_train)
+        # print(yhat_train)
         yhat_test = estimator.predict(to_predict)
-        print(yhat_test)
+        # print(yhat_test)
         train_error_per_fold[i] = calc_mean_squared_error(current_fold_y, yhat_train)
         test_error_per_fold[i] = calc_mean_squared_error(to_predict_y, yhat_test)
 

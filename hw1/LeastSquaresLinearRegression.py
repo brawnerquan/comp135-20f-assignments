@@ -63,8 +63,8 @@ class LeastSquaresLinearRegressor(object):
         # print(theta_G)
         self.w_F = theta_G[:-1]
         self.b = theta_G[-1]
-        print(self.w_F)
-        print(self.b)
+        # print(self.w_F)
+        # print(self.b)
         pass # TODO
 
 
