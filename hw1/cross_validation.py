@@ -66,7 +66,7 @@ def train_models_and_calc_scores_for_n_fold_cv(
     '[0. 0. 0. 0. 0. 0. 0.]'
     '''
 
-    assert (n_folds < 2)
+    assert (n_folds >= 2)
 
     train_error_per_fold = np.zeros(n_folds, dtype=np.float64)
     test_error_per_fold = np.zeros(n_folds, dtype=np.float64)
@@ -171,7 +171,7 @@ def make_train_and_test_row_ids_for_n_fold_cv(
     array([ 0,  0,  1,  1,  2,  2,  3,  3,  4,  4,  5,  5,  6,  6,  7,  7,  8,
             8,  9,  9, 10, 10])
     '''
-    assert (n_folds < 2)
+    assert (n_folds >= 2)
 
     if hasattr(random_state, 'rand'):
         # Handle case where provided random_state is a random generator
@@ -236,12 +236,12 @@ def make_poly_linear_regr_pipeline(degree=1):
 #     # 8,  9,  9, 10, 10])
 
 
-
+#
 # Create simple dataset of N examples where y given x
 # is perfectly explained by a linear regression model
 # N = 10
-# n_folds = 7
-# x_N3 = np.random.RandomState(0).rand(N, 10)
+# n_folds = 3
+# x_N3 = np.random.RandomState(0).rand(N, 3)
 # y_N = np.dot(x_N3, np.asarray([1., -2.0, 3.0])) - 1.3337
 # print(y_N.shape)
 # # (101,)
