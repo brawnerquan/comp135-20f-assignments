@@ -171,6 +171,8 @@ def make_train_and_test_row_ids_for_n_fold_cv(
     array([ 0,  0,  1,  1,  2,  2,  3,  3,  4,  4,  5,  5,  6,  6,  7,  7,  8,
             8,  9,  9, 10, 10])
     '''
+    assert (n_folds < 2)
+
     if hasattr(random_state, 'rand'):
         # Handle case where provided random_state is a random generator
         # (e.g. has methods rand() and randn())
