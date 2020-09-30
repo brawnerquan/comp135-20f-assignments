@@ -65,6 +65,9 @@ def train_models_and_calc_scores_for_n_fold_cv(
     >>> np.array2string(te_K, precision=8, suppress_small=True)
     '[0. 0. 0. 0. 0. 0. 0.]'
     '''
+
+    assert (n_folds < 2)
+
     train_error_per_fold = np.zeros(n_folds, dtype=np.float64)
     test_error_per_fold = np.zeros(n_folds, dtype=np.float64)
 
