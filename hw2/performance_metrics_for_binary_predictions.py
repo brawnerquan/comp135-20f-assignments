@@ -12,7 +12,7 @@ import numpy as np
 
 def calc_TP_TN_FP_FN(ytrue_N, yhat_N):
     ''' Count the four possible states of true and predicted binary values.
-    
+
     Args
     ----
     ytrue_N : 1D array, shape (n_examples,) = (N,)
@@ -38,36 +38,29 @@ def calc_TP_TN_FP_FN(ytrue_N, yhat_N):
 
     Examples
     --------
-    >>> N = 8
-    >>> ytrue_N = np.asarray([0., 0., 0., 0., 1., 1., 1., 1.])
-    >>> yhat_N  = np.asarray([0., 0., 1., 0., 1., 1., 0., 0.])
-    >>> TP, TN, FP, FN = calc_TP_TN_FP_FN(ytrue_N, yhat_N)
-    >>> TP
-    2
-    >>> TN
-    3
-    >>> FP
-    1
-    >>> FN
-    2
-    >>> np.allclose(TP + TN + FP + FN, N)
-    True
+
     '''
     # Cast input to integer just to be sure we're getting what's expected
     ytrue_N = np.asarray(ytrue_N, dtype=np.int32)
     yhat_N = np.asarray(yhat_N, dtype=np.int32)
-    
+
     # TODO fix by calculating the number of true pos, true neg, etc.
-    TP  = 0
-    TN = 0
-    FP = 0
-    FN = 0
+    TP_arr = np.bitwise_and(ytrue_N, yhat_N)
+    TN_arr = np.bitwise_and(np.logical_not(ytrue_N), np.logical_not(yhat_N))
+
+    NP = np.count_nonzero(yhat_N == 1)
+    NN = np.count_nonzero(yhat_N == 0)
+
+    TP  = np.count_nonzero(TP_arr == 1)
+    TN = np.count_nonzero(TN_arr == 1)
+    FP = NP - TP
+    FN = NN - TN
     return TP, TN, FP, FN
 
 
 def calc_ACC(ytrue_N, yhat_N):
     ''' Compute the accuracy of provided predicted binary values.
-    
+
     Args
     ----
     ytrue_N : 1D array of floats, shape (n_examples,) = (N,)
@@ -94,11 +87,14 @@ def calc_ACC(ytrue_N, yhat_N):
     >>> print("%.3f" % acc)
     0.625
     '''
+
+    TP, TN, FP, FN = calc_TP_TN_FP_FN(ytrue_N, yhat_N);
     # TODO compute accuracy
     # You should *use* your calc_TP_TN_FP_FN function from above
     # Hint: make sure denominator will never be exactly zero
+
     # by adding a small value like 1e-10
-    return 0.0
+    return (TP + TN) / (TP + TN + FN + FP + 1e-10)
 
 
 
@@ -138,16 +134,17 @@ def calc_TPR(ytrue_N, yhat_N):
     >>> print("%.3f" % empty_val)
     0.000
     '''
-    # TODO compute TPR
     # You should *use* your calc_TP_TN_FP_FN function from above
     # Hint: make sure denominator will never be exactly zero
+    TP, TN, FP, FN = calc_TP_TN_FP_FN(ytrue_N, yhat_N);
+
     # by adding a small value like 1e-10
-    return 0.0
+    return (TP) / (TP + FN + 1e-10)
 
 
 def calc_TNR(ytrue_N, yhat_N):
     ''' Compute the true negative rate of provided predicted binary values.
-    
+
     Args
     ----
     ytrue_N : 1D array of floats, shape (n_examples,) = (N,)
@@ -183,7 +180,10 @@ def calc_TNR(ytrue_N, yhat_N):
     # You should *use* your calc_TP_TN_FP_FN function from above
     # Hint: make sure denominator will never be exactly zero
     # by adding a small value like 1e-10
-    return 0.0
+    TP, TN, FP, FN = calc_TP_TN_FP_FN(ytrue_N, yhat_N);
+
+    # by adding a small value like 1e-10
+    return (TN) / (FP + TN + 1e-10)
 
 
 
@@ -191,7 +191,7 @@ def calc_PPV(ytrue_N, yhat_N):
     ''' Compute positive predictive value of provided predicted binary values.
 
     Also known as the precision.
-    
+
     Args
     ----
     ytrue_N : 1D array of floats, shape (n_examples,) = (N,)
@@ -227,12 +227,14 @@ def calc_PPV(ytrue_N, yhat_N):
     # You should *use* your calc_TP_TN_FP_FN function from above
     # Hint: make sure denominator will never be exactly zero
     # by adding a small value like 1e-10
-    return 0.0
+    TP, TN, FP, FN = calc_TP_TN_FP_FN(ytrue_N, yhat_N);
+
+    return (TP) / (TP + FP + 1e-10)
 
 
 def calc_NPV(ytrue_N, yhat_N):
     ''' Compute negative predictive value of provided predicted binary values.
-    
+
     Args
     ----
     ytrue_N : 1D array of floats, shape (n_examples,) = (N,)
@@ -268,5 +270,82 @@ def calc_NPV(ytrue_N, yhat_N):
     # You should *use* your calc_TP_TN_FP_FN function from above
     # Hint: make sure denominator will never be exactly zero
     # by adding a small value like 1e-10
-    return 0.0
+    TP, TN, FP, FN = calc_TP_TN_FP_FN(ytrue_N, yhat_N);
 
+    # by adding a small value like 1e-10
+    return (TN) / (TN + FN + 1e-10)
+
+
+# N = 8
+# ytrue_N = np.asarray([0., 0., 0., 0., 1., 1., 1., 1.])
+# yhat_N  = np.asarray([0., 0., 1., 0., 1., 1., 0., 0.])
+# TP, TN, FP, FN = calc_TP_TN_FP_FN(ytrue_N, yhat_N)
+# print(TP)
+# #2
+# print(TN)
+# #3
+# print(FP)
+# #1
+# print(FN)
+# #2
+# print(np.allclose(TP + TN + FP + FN, N))
+# #True
+
+
+# N = 8
+# ytrue_N = np.asarray([0., 0., 0., 0., 1., 1., 1., 1.])
+# yhat_N  = np.asarray([0., 0., 1., 0., 1., 1., 0., 0.])
+# acc = calc_ACC(ytrue_N, yhat_N)
+# print("%.3f" % acc)
+# #0.625
+
+
+# N = 8
+# ytrue_N = np.asarray([0., 0., 0., 0., 1., 1., 1., 1.])
+# yhat_N  = np.asarray([0., 0., 1., 0., 1., 1., 0., 0.])
+# tpr = calc_TPR(ytrue_N, yhat_N)
+# print("%.3f" % tpr)
+# # 0.500
+#
+# # Verify what happens with empty input
+# empty_val = calc_TPR([], [])
+# print("%.3f" % empty_val)
+# # 0.000
+#
+# N = 8
+# ytrue_N = np.asarray([0., 0., 0., 0., 1., 1., 1., 1.])
+# yhat_N  = np.asarray([0., 0., 1., 0., 1., 1., 0., 0.])
+# tnr = calc_TNR(ytrue_N, yhat_N)
+# print("%.3f" % tnr)
+# # 0.750
+#
+# # Verify what happens with empty input
+# empty_val = calc_TNR([], [])
+# print("%.3f" % empty_val)
+# # 0.000
+
+
+# N = 8
+# ytrue_N = np.asarray([0., 0., 0., 0., 1., 1., 1., 1.])
+# yhat_N  = np.asarray([0., 0., 1., 0., 1., 1., 0., 0.])
+# ppv = calc_PPV(ytrue_N, yhat_N)
+# print("%.3f" % ppv)
+# # 0.667
+#
+# # Verify what happens with empty input
+# empty_val = calc_PPV([], [])
+# print("%.3f" % empty_val)
+# # 0.000
+
+
+# N = 8
+# ytrue_N = np.asarray([0., 0., 0., 0., 1., 1., 1., 1.])
+# yhat_N  = np.asarray([0., 0., 1., 0., 1., 1., 0., 0.])
+# npv = calc_NPV(ytrue_N, yhat_N)
+# print("%.3f" % npv)
+# # 0.600
+#
+# # Verify what happens with empty input
+# empty_val = calc_NPV([], [])
+# print("%.3f" % empty_val)
+# # 0.000
