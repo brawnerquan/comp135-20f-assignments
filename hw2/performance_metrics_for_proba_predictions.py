@@ -188,9 +188,9 @@ def calc_mean_binary_cross_entropy_from_scores(ytrue_N, scores_N):
     True
     '''
     if(len(ytrue_N) < 1):
-        return 0
+        return 0.0
     if(len(scores_N) < 1):
-        return 0
+        return 0.0
 
     # Cast labels to integer just to be sure we're getting what's expected
     ytrue_N = np.asarray(ytrue_N, dtype=np.int32)
