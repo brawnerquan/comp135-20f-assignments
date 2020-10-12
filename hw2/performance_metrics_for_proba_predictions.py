@@ -243,46 +243,46 @@ def calc_mean_binary_cross_entropy_from_scores(ytrue_N, scores_N):
 # print(np.allclose(0.0, empty_bce))
 # # True
 
-N = 8
-ytrue_N = np.asarray([0., 0., 0., 0., 1., 1., 1., 1.])
-
-# Try some good scores for these 8 points.
-good_scores_N = np.asarray([-4., -3., -2., -1., 1, 2., 3., 4.])
-good_bce = calc_mean_binary_cross_entropy_from_scores(ytrue_N, good_scores_N)
-print("%.6f" % (good_bce))
-# 0.182835
-
-# Try some near-perfect scores for these 8 points.
-perfect_scores_N = np.asarray([-9., -9., -9,  -9., 9., 9., 9., 9.])
-perfect_bce = calc_mean_binary_cross_entropy_from_scores(ytrue_N, perfect_scores_N)
-print("%.6f" % (perfect_bce))
-# 0.000178
-
-# Check same computation with "probas". Should match exactly.
-perfect_bce2 = calc_mean_binary_cross_entropy_from_probas(ytrue_N, sigmoid(perfect_scores_N))
-print("%.6f" % (perfect_bce2))
-# 0.000178
-
-# Try some extreme scores (should get worse BCE with more extreme scores)
-ans = calc_mean_binary_cross_entropy_from_scores([0], [+99.])
-print("%.6f" % (ans))
-# 142.826809
-ans = calc_mean_binary_cross_entropy_from_scores([0], [+999.])
-print("%.6f" % (ans))
-# 1441.252346
-ans = calc_mean_binary_cross_entropy_from_scores([0], [+9999.])
-print("%.6f" % (ans))
-# 14425.507714
-
-# Try with "probas": sigmoid saturates! using scores is *better*
-a = calc_mean_binary_cross_entropy_from_probas([0], sigmoid([+999.]))
-print("%.6f" % (a))
-# 46.508147
-a = calc_mean_binary_cross_entropy_from_probas([0], sigmoid([+9999.]))
-print("%.6f" % (a))
-# 46.508147
-
-# Try empty
-empty_bce = calc_mean_binary_cross_entropy_from_scores([], [])
-np.allclose(0.0, empty_bce)
+# N = 8
+# ytrue_N = np.asarray([0., 0., 0., 0., 1., 1., 1., 1.])
+#
+# # Try some good scores for these 8 points.
+# good_scores_N = np.asarray([-4., -3., -2., -1., 1, 2., 3., 4.])
+# good_bce = calc_mean_binary_cross_entropy_from_scores(ytrue_N, good_scores_N)
+# print("%.6f" % (good_bce))
+# # 0.182835
+#
+# # Try some near-perfect scores for these 8 points.
+# perfect_scores_N = np.asarray([-9., -9., -9,  -9., 9., 9., 9., 9.])
+# perfect_bce = calc_mean_binary_cross_entropy_from_scores(ytrue_N, perfect_scores_N)
+# print("%.6f" % (perfect_bce))
+# # 0.000178
+#
+# # Check same computation with "probas". Should match exactly.
+# perfect_bce2 = calc_mean_binary_cross_entropy_from_probas(ytrue_N, sigmoid(perfect_scores_N))
+# print("%.6f" % (perfect_bce2))
+# # 0.000178
+#
+# # Try some extreme scores (should get worse BCE with more extreme scores)
+# ans = calc_mean_binary_cross_entropy_from_scores([0], [+99.])
+# print("%.6f" % (ans))
+# # 142.826809
+# ans = calc_mean_binary_cross_entropy_from_scores([0], [+999.])
+# print("%.6f" % (ans))
+# # 1441.252346
+# ans = calc_mean_binary_cross_entropy_from_scores([0], [+9999.])
+# print("%.6f" % (ans))
+# # 14425.507714
+#
+# # Try with "probas": sigmoid saturates! using scores is *better*
+# a = calc_mean_binary_cross_entropy_from_probas([0], sigmoid([+999.]))
+# print("%.6f" % (a))
+# # 46.508147
+# a = calc_mean_binary_cross_entropy_from_probas([0], sigmoid([+9999.]))
+# print("%.6f" % (a))
+# # 46.508147
+#
+# # Try empty
+# empty_bce = calc_mean_binary_cross_entropy_from_scores([], [])
+# np.allclose(0.0, empty_bce)
 # True
