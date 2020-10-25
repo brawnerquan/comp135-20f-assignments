@@ -23,7 +23,7 @@ frac_train = pos_train/train_count
 frac_valid = pos_valid/valid_count
 
 print("train count:",  train_count)
-print("test count:",  valid_count)
+print("valid count:",  valid_count)
 print("frac train:", frac_train)
 print("frac valid:", frac_valid)
 
@@ -69,12 +69,17 @@ for i in range(1,41):
 plt.plot(iter_list, entropy_train_list, '.-', c='b', label="training set")
 plt.plot(iter_list, entropy_valid_list, '.-', c='r', label="validation set")
 
+plt.title("Log Loss vs Training Iterations on Training and Validation Datasets")
+
+
 plt.ylabel("log loss")
 plt.xlabel("iterations")
 
 plt.legend(loc='upper right')
 
 plt.show()
+
+plt.title("Zero One Loss vs Training Iterations on Training and Validation Datasets")
 
 
 plt.plot(iter_list, zero_train_list, '.-', c='b', label="training set")
@@ -86,7 +91,6 @@ plt.xlabel("iterations")
 plt.legend(loc='upper right')
 
 plt.show()
-    
 """
 
 """
@@ -112,6 +116,8 @@ for C in C_grid:
 plt.plot(C_grid, zero_train_list, '.-', c='b', label="training set")
 plt.plot(C_grid, zero_valid_list, '.-', c='r', label="validation set")
 
+plt.title("Zero One Loss Error Rate v.s. C Parameter Selection")
+
 plt.ylabel("error rate")
 plt.xlabel("C")
 
@@ -124,11 +130,15 @@ optimal_C = C_grid[np.argmin(zero_valid_list)]
 print(optimal_C)
 """
 
+
+
 optimal_C = 0.01
 
 
 model = sklearn.linear_model.LogisticRegression(C=optimal_C, solver='lbfgs', max_iter=1000)
 model.fit(x_train, y_train)
+
+"""
 
 y_hat = model.predict(x_valid).flatten()
 
@@ -139,7 +149,8 @@ FN_id = np.arange(valid_count)[FN_id]
 FP_id = np.arange(valid_count)[FP_id]
 
 
-"""
+
+
 import show_images
 show_images.show_images(x_valid, y_hat, FN_id[:9].astype(int))
 
@@ -150,8 +161,11 @@ show_images.show_images(x_valid, y_hat, FP_id[:9].astype(int))
 plt.show()
 """
 
+
 weights = model.coef_.reshape((28,-1))
 
 plt.imshow(weights, vmin=-0.5, vmax=0.5, cmap='RdYlBu')
 plt.show()
+
+
 

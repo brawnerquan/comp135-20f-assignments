@@ -18,7 +18,9 @@ y_train = df_y_train.to_numpy()
 trans_train = []
 
 for row in x_train:
-    curr = convolve(row.reshape((28,28)), 28, 28, np.ones((3,3)))
+    #curr = convolve(row.reshape((28,28)), 28, 28, np.ones((3,3)))
+    curr = np.where(row > 0, 1, 0)
+
     trans_train.append(curr.flatten())
 
 trans_train = np.array(trans_train)
@@ -34,8 +36,10 @@ kf = KFold(n_splits=10)
 C_lst_train = []
 C_lst_valid = []
 
+model_list = []
+
 for c in C:
-  model = sklearn.linear_model.LogisticRegression(C=c, solver='lbfgs', max_iter=100)
+  model = sklearn.linear_model.LogisticRegression(C=c, solver='lbfgs', max_iter=1000)
 
   avg_score_tr = []
   avg_score_va = []
@@ -45,6 +49,8 @@ for c in C:
       
       
       model.fit(curr_train_x, curr_train_y.flatten())
+
+      model_list.append(model)     
       
       
       y_hat = model.predict(curr_train_x).flatten()
@@ -59,3 +65,20 @@ for c in C:
 
 print(C_lst_train)
 print(C_lst_valid)
+
+best = model_list[np.argmin(C_lst_valid)]
+
+save = best.predict(x_train)
+with open("temp.npy", 'wb') as f:
+  np.save(f, save)
+
+
+#save = np.load("temp.npy")
+
+print(save.shape)
+
+
+print(len(np.where(save == y_train.flatten())[0]))
+
+print(np.sum(save != y_train))
+

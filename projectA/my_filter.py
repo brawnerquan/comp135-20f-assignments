@@ -21,12 +21,31 @@ def convolve(img,rows, cols, kernel):
 
     return middle + right + left + top + bottom + top_left + top_right + bottom_right + bottom_left
 
+def convolve2(img, rows, cols, kernel):
+    x_pad = (kernel.shape[1]-1)//2
+    y_pad = (kernel.shape[0]-1)//2
+
+    padded = np.zeros((rows + 2*y_pad, cols + 2*x_pad))
+    padded[y_pad:y_pad+rows, x_pad:x_pad+cols] = img.copy()
+
+    out = np.zeros((rows, cols))
+    
+    x_size = kernel.shape[1]
+    y_size = kernel.shape[0]
+
+    for r in range(rows):
+        for c in range(cols):
+            out[r,c] = np.sum(kernel * padded[r:r+y_size, c:c+x_size])
+
+    return out
+
+            
 
 
 if __name__ == "__main__":
     img = np.ones((25,25))
     k = np.ones((3,3))
 
-    out = convolve(img, 25, 25, k)
+    out = convolve2(img, 25, 25, k)
 
     print(out)

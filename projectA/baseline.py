@@ -18,7 +18,7 @@ kf = KFold(n_splits=10)
 
 C_lst_train = []
 C_lst_valid = []
-
+"""
 for c in C:
   model = sklearn.linear_model.LogisticRegression(C=c, solver='lbfgs', max_iter=100)
 
@@ -44,3 +44,14 @@ for c in C:
 
 print(C_lst_train)
 print(C_lst_valid)
+
+print(C[np.argmin(C_lst_valid)])
+
+"""
+
+model = sklearn.linear_model.LogisticRegression(C=0.292, solver='sag', max_iter=1000)
+model.fit(x_train, y_train.flatten())
+
+save = model.predict(x_train)
+
+print(len(np.where(save == y_train.flatten())[0]))
