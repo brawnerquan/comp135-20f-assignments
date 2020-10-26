@@ -11,8 +11,11 @@ id0 = np.where(gt.flatten() == 0)
 s1 = train[id0].flatten()
 s2 = train[id1].flatten()
 
+"""
 plt.hist([s1[s1>0], s2[s2>0]], 256)
 plt.show()
+
+"""
 
 """
 #total on pixels have same mean different variance
@@ -53,4 +56,23 @@ plt.hist(res[id0].T)
 plt.figure()
 plt.hist(res[id1].T)
 plt.show()
-"""           
+"""   
+
+x_train = np.repeat([np.arange(28)], 28, axis=0)
+y_train = x_train.T
+
+cent_xs = []
+cent_ys = []
+for row in train:
+    x_pos = (row.reshape((28,28))*x_train).sum()/(np.sum(row))
+    y_pos = (row.reshape((28,28))*y_train).sum()/(np.sum(row))
+
+    cent_xs.append(x_pos)
+    cent_ys.append(y_pos)
+
+plt.hist2d(cent_xs, cent_ys, 100)
+plt.show()
+
+    
+
+        

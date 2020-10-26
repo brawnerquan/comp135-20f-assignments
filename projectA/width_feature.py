@@ -1,5 +1,8 @@
 import numpy as np
 import pandas as pd
+
+import numpy as np
+import pandas as pd
 import sklearn.linear_model
 
 from sklearn.model_selection import KFold, train_test_split
@@ -12,23 +15,53 @@ df_x_test = pd.read_csv("data_sneaker_vs_sandal/x_test.csv")
 df_x_train = pd.read_csv("data_sneaker_vs_sandal/x_train.csv")
 df_y_train = pd.read_csv("data_sneaker_vs_sandal/y_train.csv")
 
-
 x_test = df_x_test.to_numpy()
 x_train = df_x_train.to_numpy()
 y_train = df_y_train.to_numpy()
 
-k = np.ones((3,3))
+def splitter(img):
+    out = []
+    for row in img:
+        new_row = []
+        counts = [0]
+        index = []
 
-trans_train = convolve2(np.where(x_train > 0, 1, 0).reshape(-1, 28, 28), 28, 28, k)
-trans_train = trans_train.reshape((-1, 28**2))
+        for (i, col) in enumerate(row[:-1]):
+            counts[-1] += 1
+            if col != row[i+1]:
+                counts.append(0)
+                index.append(i)
+
+        index.append(len(row)-1)
+        
+        curr_i = 0
+        for (i,col) in enumerate(row):
+            if i > index[curr_i]:
+                curr_i += 1
+            
+            res = counts[curr_i]
+            new_row.append(res)
+
+        out.append(new_row)
+
+    return np.array(out)             
 
 
-trans_train = np.array(trans_train)
+new_train1 = []
+new_train2 = []
 
-x_train = trans_train
+for row in x_train:
+    new_train1.append(splitter(row.reshape((28,28))).flatten())
 
+for row in x_train:
+    new_train2.append(splitter(row.reshape((28,28)).T).flatten())
 
-print("it took forever")
+new_train1 = np.array(new_train1)
+new_train2 = np.array(new_train2)
+
+x_train = np.hstack([new_train1, new_train2])
+
+print("finally done")
 
 """
 C = np.logspace(-8, 8, 31)
@@ -39,7 +72,7 @@ C_lst_valid = []
 
 
 for c in C:
-  model = sklearn.linear_model.LogisticRegression(C=c, solver='lbfgs', max_iter=1000)
+  model = sklearn.linear_model.LogisticRegression(C=c, solver='lbfgs', max_iter=100)
 
   avg_score_tr = []
   avg_score_va = []
@@ -69,14 +102,13 @@ print(C_lst_valid)
 
 
 
-print(C[np.argmin(C_lst_valid)])
+print(C[np.argmin(C_lst_valid)])       
 """
 
-#0.00018478497974222906
-#0.007356422544596407 - 1000 iter training
+#135.93563908785242
 
-train_in, test_in, train_out, test_out = train_test_split(x_train, y_train, test_size=0.1)
-model = sklearn.linear_model.LogisticRegression(C=0.0073564225, solver='sag', max_iter=3000)
+train_in, test_in, train_out, test_out = train_test_split(x_train, y_train, test_size=0.5)
+model = sklearn.linear_model.LogisticRegression(C=135.9356, solver='sag', max_iter=6000)
 model.fit(train_in, train_out.flatten())
 
 
@@ -85,14 +117,7 @@ save = model.predict(test_in)
 print(len(np.where(save == test_out.flatten())[0]))
 print(test_out.shape)
 
+from joblib import dump, load
 
-#model = sklearn.linear_model.LogisticRegression(C=0.0021, solver='sag', max_iter=3000)
-#model.fit(x_train, y_train.flatten())
-
-#save = model.predict(x_train)
-
-#print(len(np.where(save == y_train.flatten())[0]))
-#print(y_train.shape)
-#print(sklearn.metrics.zero_one_loss(save, test_out))
-
-
+dump(model, "width.joblib")
+        

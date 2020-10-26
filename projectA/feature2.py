@@ -3,8 +3,11 @@ import pandas as pd
 import sklearn.linear_model
 
 from sklearn.model_selection import KFold
+from sklearn.model_selection import train_test_split
 
 from my_filter import convolve
+
+import matplotlib.pyplot as plt
 
 df_x_test = pd.read_csv("data_sneaker_vs_sandal/x_test.csv")
 df_x_train = pd.read_csv("data_sneaker_vs_sandal/x_train.csv")
@@ -15,6 +18,44 @@ x_test = df_x_test.to_numpy()
 x_train = df_x_train.to_numpy()
 y_train = df_y_train.to_numpy()
 
+
+"""
+new_x_train = []
+
+train_xs = np.repeat([np.arange(28)], 28, axis=0)
+train_ys = train_xs.T
+
+for row in x_train:
+    x_pos = (row.reshape((28,28))*train_xs).sum()/(np.sum(row))
+    y_pos = (row.reshape((28,28))*train_ys).sum()/(np.sum(row))
+
+    shift_x = int(14 - x_pos) 
+    shift_y = int(14 - y_pos)
+
+    ori = row.reshape((28,28)).copy()
+
+    out1 = np.zeros((28,28))
+
+    if shift_x > 0:
+        out1[:, shift_x:] = ori[:, :-shift_x]
+    elif shift_x < 0:
+        out1[:, :shift_x] = ori[:, -shift_x: ]
+
+    out2 = np.zeros((28,28))
+
+    if shift_y > 0:
+        out2[shift_y:, :] = out1[:-shift_y, :]
+    elif shift_y < 0:
+        out2[:shift_y, :] = out1[-shift_y:, : ]
+
+    new_x_train.append(out2.flatten())
+
+train_x = np.array(new_x_train)
+    
+"""
+    
+
+    
 
 
 def splitter(arr):
@@ -33,6 +74,7 @@ def splitter(arr):
 
 
 trans_train = []
+trans_train_T = []
 
 for row in x_train:
     curr = np.where(row > 0, 1, 0)
@@ -43,11 +85,23 @@ for row in x_train:
 
 trans_train = np.array(trans_train)
 
-x_train = trans_train
+for row in x_train:
+    curr = np.where(row > 0, 1, 0)
+    curr = splitter(row.reshape((28,28)).T)
+    
+
+    trans_train_T.append(curr.flatten())
+
+trans_train_T = np.array(trans_train_T)
+
+
+ori_x_train = x_train.copy()
+x_train = np.hstack([trans_train, trans_train_T])
 
 print("it took forever")
 
 
+"""
 C = np.logspace(-8, 8, 31)
 kf = KFold(n_splits=10)
 
@@ -56,10 +110,10 @@ C_lst_valid = []
 
 model_list = []
 
-"""
+
 
 for c in C:
-  model = sklearn.linear_model.LogisticRegression(C=c, solver='sag', max_iter=1000)
+  model = sklearn.linear_model.LogisticRegression(C=c, solver='sag', max_iter=100)
 
   avg_score_tr = []
   avg_score_va = []
@@ -103,10 +157,51 @@ print(save.shape)
 
 """
 
-model = sklearn.linear_model.LogisticRegression(C=0.292, solver='sag', max_iter=1000)
-model.fit(x_train, y_train)
+# 0.002154434690031882 -- 2 directions (at 100 iter)
+# 0.292 -- 1 directions
 
-save = model.predict(x_train)
 
-print(len(np.where(save == y_train.flatten())[0]))
+
+#train_in, test_in, train_out, test_out = train_test_split(x_train, y_train, test_size=0.2)
+
+test_size = int(0.2*1200)
+
+indexes = np.arange(1200)
+np.random.shuffle(indexes)
+
+train_in = x_train[indexes[test_size:]]
+train_out = y_train[indexes[test_size:]]
+
+test_in = x_train[indexes[:test_size]]
+test_out = y_train[indexes[:test_size]]
+
+
+
+model = sklearn.linear_model.LogisticRegression(C=0.0021, solver='sag', max_iter=3000)
+model.fit(train_in, train_out.flatten())
+
+plt.imshow(model.coef_.reshape((28,2)))
+plt.show()
+
+save = model.predict(test_in)
+
+print(len(np.where(save == test_out.flatten())[0]))
+
+idx = np.where(save != test_out.flatten())[0]
+print(idx.shape)
+
+for id_ in idx:
+    print(test_in[id_])
+    plt.imshow(ori_x_train[indexes[id_]].reshape((28,28)))
+    plt.show()
+    
+
+
+
+
+
+
+
+
+
 

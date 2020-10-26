@@ -25,17 +25,20 @@ def convolve2(img, rows, cols, kernel):
     x_pad = (kernel.shape[1]-1)//2
     y_pad = (kernel.shape[0]-1)//2
 
-    padded = np.zeros((rows + 2*y_pad, cols + 2*x_pad))
-    padded[y_pad:y_pad+rows, x_pad:x_pad+cols] = img.copy()
+    img_dim = img.shape[0]
+    k_try = np.repeat([kernel], img_dim, axis=0) 
 
-    out = np.zeros((rows, cols))
+    padded = np.zeros((img_dim, rows + 2*y_pad, cols + 2*x_pad))
+    padded[:, y_pad:y_pad+rows, x_pad:x_pad+cols] = img.copy()
+
+    out = np.zeros((img_dim, rows, cols))
     
     x_size = kernel.shape[1]
     y_size = kernel.shape[0]
 
     for r in range(rows):
         for c in range(cols):
-            out[r,c] = np.sum(kernel * padded[r:r+y_size, c:c+x_size])
+            out[:, r,c] = np.sum(k_try * padded[:, r:r+y_size, c:c+x_size], axis=1).sum(axis=1)
 
     return out
 
@@ -43,7 +46,7 @@ def convolve2(img, rows, cols, kernel):
 
 
 if __name__ == "__main__":
-    img = np.ones((25,25))
+    img = np.ones((3, 25,25))
     k = np.ones((3,3))
 
     out = convolve2(img, 25, 25, k)
