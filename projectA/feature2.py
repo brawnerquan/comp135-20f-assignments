@@ -19,6 +19,30 @@ x_train = df_x_train.to_numpy()
 y_train = df_y_train.to_numpy()
 
 
+def show_images(X, y, row_ids, n_rows=3, n_cols=3):
+    ''' Display images
+
+    Args
+    ----
+    X : 2D array, shape (N, 784)
+        Each row is a flat image vector for one example
+    y : 1D array, shape (N,)
+        Each row is label for one example
+    row_ids : list of int
+        Which rows of the dataset you want to display
+    '''
+    fig, axes = plt.subplots(
+            nrows=n_rows, ncols=n_cols,
+            figsize=(n_cols * 3, n_rows * 3))
+
+    for ii, row_id in enumerate(row_ids):
+        cur_ax = axes.flatten()[ii]
+        cur_ax.imshow(X[row_id].reshape(28,28), interpolation='nearest', vmin=0, vmax=1, cmap='gray')
+        cur_ax.set_xticks([])
+        cur_ax.set_yticks([])
+        cur_ax.set_title('y=%d' % y[row_id])
+
+
 """
 new_x_train = []
 
@@ -96,13 +120,14 @@ trans_train_T = np.array(trans_train_T)
 
 
 ori_x_train = x_train.copy()
+x_train_old = x_train.copy()
 x_train = np.hstack([trans_train, trans_train_T])
 
 print("it took forever")
 
-
 """
-C = np.logspace(-8, 8, 31)
+
+C = np.logspace(-8, 0, 31)
 kf = KFold(n_splits=10)
 
 C_lst_train = []
@@ -146,16 +171,28 @@ best = model_list[np.argmin(C_lst_valid)]
 
 print(C[np.argmin(C_lst_valid)])
 
+plt.plot(C, C_lst_train, '.-', c='b', label="training set")
+plt.plot(C, C_lst_valid, '.-', c='r', label="validation set")
+
+plt.title("Log Loss vs C Hyperparameter Selection")
+
+
+plt.ylabel("log loss")
+plt.xlabel("C")
+
+plt.legend(loc='upper right')
+plt.show()
+
 save = best.predict(x_train)
 with open("temp.npy", 'wb') as f:
   np.save(f, save)
-
+"""
 
 #save = np.load("temp.npy")
 
-print(save.shape)
+#print(save.shape)
 
-"""
+
 
 # 0.002154434690031882 -- 2 directions (at 100 iter)
 # 0.292 -- 1 directions
@@ -163,6 +200,8 @@ print(save.shape)
 
 
 #train_in, test_in, train_out, test_out = train_test_split(x_train, y_train, test_size=0.2)
+
+
 
 test_size = int(0.2*1200)
 
@@ -183,7 +222,45 @@ model.fit(train_in, train_out.flatten())
 plt.imshow(model.coef_.reshape((28,2)))
 plt.show()
 
-save = model.predict(test_in)
+save = model.predict_proba(test_in)[:, 1]
+fpr, tpr, thresholds = sklearn.metrics.roc_curve(test_out.flatten(), save.flatten())
+
+print(fpr)
+
+plt.plot(fpr, tpr, '.-', c='b', label="validation set")
+
+save = model.predict_proba(train_in)[:, 1]
+
+fpr, tpr, thresholds = sklearn.metrics.roc_curve(train_out.flatten(), save.flatten())
+
+plt.plot(fpr, tpr,'.-', c='r', label="training set")
+plt.title("ROC curve of Number of Continuous Strips Model")
+
+
+plt.ylabel("True Positive Rate")
+plt.xlabel("False Positive Rate")
+
+plt.legend(loc='lower right')
+plt.show()
+
+y_hat = model.predict(test_in)
+
+idx = list(np.where(np.logical_and(y_hat.flatten() == 1, test_out.flatten() == 0))[0][:3])
+idx += list(np.where(np.logical_and(y_hat.flatten() == 0, test_out.flatten() == 1))[0][:3])
+
+
+
+print(idx)
+
+true_idx = idx#indexes[idx]
+
+show_images(x_train_old[indexes[:test_size]], y_hat, true_idx, n_rows=2, n_cols=3)
+
+plt.show()
+
+
+
+"""
 
 print(len(np.where(save == test_out.flatten())[0]))
 
@@ -194,6 +271,8 @@ for id_ in idx:
     print(test_in[id_])
     plt.imshow(ori_x_train[indexes[id_]].reshape((28,28)))
     plt.show()
+"""
+
     
 
 

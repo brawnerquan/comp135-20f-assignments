@@ -4,6 +4,7 @@ import sklearn.linear_model
 
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
+import sklearn.metrics
 
 import matplotlib.pyplot as plt
 
@@ -53,14 +54,15 @@ for row in x_train:
 
 train_x = np.array(new_x_train)
 """
+"""
 
-
-C = np.logspace(-8, 8, 31)
+C = np.logspace(-8, 0, 31)
 kf = KFold(n_splits=10)
 
 C_lst_train = []
 C_lst_valid = []
-"""
+
+
 for c in C:
   model = sklearn.linear_model.LogisticRegression(C=c, solver='lbfgs', max_iter=100)
 
@@ -89,20 +91,56 @@ print(C_lst_valid)
 
 print(C[np.argmin(C_lst_valid)])
 
+plt.plot(C, C_lst_train, '.-', c='b', label="training set")
+plt.plot(C, C_lst_valid, '.-', c='r', label="validation set")
+
+plt.title("Log Loss vs C Hyperparameter Selection")
+
+
+plt.ylabel("log loss")
+plt.xlabel("C")
+
+plt.legend(loc='upper right')
+plt.show()
+
 """
 
-train_in, test_in, train_out, test_out = train_test_split(x_train, y_train, test_size=0.2)
+
+
+train_in, test_in, train_out, test_out = train_test_split(x_train, y_train, test_size=0.3)
 
 
 
-model = sklearn.linear_model.LogisticRegression(C=0.292, solver='sag', max_iter=1000)
+model = sklearn.linear_model.LogisticRegression(C=0.292, solver='lbfgs', max_iter=1000)
 model.fit(train_in, train_out.flatten())
 
 plt.imshow(model.coef_.reshape((28,28)))
 plt.show()
 
-save = model.predict(test_in)
+save = model.predict_proba(test_in)[:, 1]
+
+fpr, tpr, thresholds = sklearn.metrics.roc_curve(test_out.flatten(), save.flatten())
+
+print(fpr)
+
+plt.plot(fpr, tpr, '.-', c='b', label="validation set")
+
+save = model.predict_proba(train_in)[:, 1]
+
+fpr, tpr, thresholds = sklearn.metrics.roc_curve(train_out.flatten(), save.flatten())
+
+plt.plot(fpr, tpr,'.-', c='r', label="training set")
+
+plt.title("ROC curve of Baseline")
+
+
+plt.ylabel("True Positive Rate")
+plt.xlabel("False Positive Rate")
+
+plt.legend(loc='lower right')
+plt.show()
 
 print(len(np.where(save == test_out.flatten())[0]))
 print(test_out.shape)
 print(sklearn.metrics.zero_one_loss(save, test_out))
+

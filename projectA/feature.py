@@ -27,6 +27,8 @@ trans_train = np.array(trans_train)
 
 x_train = trans_train
 
+x_test = convolve2(np.where(x_test > 0, 1, 0).reshape(-1, 28, 28), 28, 28, k).reshape((-1, 28**2))
+
 
 print("it took forever")
 
@@ -75,6 +77,8 @@ print(C[np.argmin(C_lst_valid)])
 #0.00018478497974222906
 #0.007356422544596407 - 1000 iter training
 
+
+"""
 train_in, test_in, train_out, test_out = train_test_split(x_train, y_train, test_size=0.1)
 model = sklearn.linear_model.LogisticRegression(C=0.0073564225, solver='sag', max_iter=3000)
 model.fit(train_in, train_out.flatten())
@@ -84,7 +88,7 @@ save = model.predict(test_in)
 
 print(len(np.where(save == test_out.flatten())[0]))
 print(test_out.shape)
-
+"""
 
 #model = sklearn.linear_model.LogisticRegression(C=0.0021, solver='sag', max_iter=3000)
 #model.fit(x_train, y_train.flatten())
@@ -94,5 +98,26 @@ print(test_out.shape)
 #print(len(np.where(save == y_train.flatten())[0]))
 #print(y_train.shape)
 #print(sklearn.metrics.zero_one_loss(save, test_out))
+
+id0 = np.where(y_train.flatten() == 0)[0]
+id1 = np.where(y_train.flatten() == 1)[0]
+
+model = sklearn.linear_model.LogisticRegression(penalty='l1', C=0.0073564225, solver='saga', max_iter=1)
+
+#model.coef_ = x_train[id1].mean(axis=0) - x_train[id0].mean(axis=0)
+
+model.fit(x_train, y_train.flatten())
+
+
+
+plt.imshow(model.coef_.reshape((28,28)))
+plt.show()
+
+prob = model.predict_proba(x_test)
+print(prob)
+np.savetxt("y_test.txt", prob[:, 1].flatten())
+
+
+
 
 

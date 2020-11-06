@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from my_filter import convolve2
+
 train = pd.read_csv("data_sneaker_vs_sandal/x_train.csv").to_numpy()
 gt = pd.read_csv("data_sneaker_vs_sandal/y_train.csv").to_numpy()
 
@@ -58,6 +60,8 @@ plt.hist(res[id1].T)
 plt.show()
 """   
 
+"""
+
 x_train = np.repeat([np.arange(28)], 28, axis=0)
 y_train = x_train.T
 
@@ -73,6 +77,79 @@ for row in train:
 plt.hist2d(cent_xs, cent_ys, 100)
 plt.show()
 
-    
+"""
+
+"""
+train = np.where(train > 0, 1, 0)
+
+k = np.ones((3,3))
+
+train_out = train.reshape((-1, 28, 28))
+
+train_out = convolve2(train_out, 28,28, k)
+train_out = np.where(np.logical_and(train_out < 9, train_out > 0), 1, 0)
+
+xs = list([np.where(row > 0)[1] for row in train_out])    
+ys = list([np.where(row > 0)[0] for row in train_out])
+
+xs = np.array(xs)
+ys = np.array(ys)
+
+
+
+
+x_list = np.concatenate(xs[id1])
+y_list = np.concatenate(ys[id1])
+
+
+
+plt.hist2d(x_list, y_list, 100)
+plt.show()
+"""
+
+
+train = np.where(train > 0, 1, 0)
+train_out = train.reshape((-1, 28,28))
+
+train_out = convolve2(train_out, 28, 28, np.ones((3,3))).astype(int)
+
+train_out1 = train_out[id1].mean(axis=0)
+
+train_out1 = train_out1 / np.max(train_out1)
+
+train_out0 = train_out[id0].mean(axis=0)
+train_out0 = train_out0 / np.max(train_out0)
+
+plt.imshow(train_out1)
+plt.figure()
+plt.imshow(train_out0)
+plt.show()
+
+
+"""
+train = np.where(train > 0, 1, 0)
+train_out = train.reshape((-1, 28,28))
+
+train_out = convolve2(train_out, 28, 28, np.ones((3,3))).astype(int)
+train_out = np.where(np.logical_and(train_out < 9, train_out > 0), 1, 0)
+
+train_out1 = train_out[id1].mean(axis=0)
+
+train_out1 = train_out1 / np.max(train_out1)
+
+train_out0 = train_out[id0].mean(axis=0)
+train_out0 = train_out0 / np.max(train_out0)
+
+plt.imshow(train_out1)
+plt.figure()
+plt.imshow(train_out0)
+plt.show()
+"""
+
+
+#plt.imshow(train.mean(axis=0).reshape((28,28)))
+#plt.show()
+
+
 
         
