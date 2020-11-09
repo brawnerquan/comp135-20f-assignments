@@ -108,22 +108,21 @@ class InternalDecisionNode(object):
         '''
         T, F = x_TF.shape
 
-        # TODO determine which of the input T examples belong to the 
+        # TODO determine which of the input T examples belong to the
         # left child and which belong to the right
         # Hint: use this node's "feat_id" and "thresh_val" attributes
+        left_mask = x_TF[:, self.feat_id] < self.thresh_val
+        right_mask = np.logical_not(left_mask)
 
-        # TODO ask the left child for its predictions (call 'predict')
-        # TODO ask the right child for its predictions (call 'predict')
-        
-        # TODO aggregate all predictions and return one array
-        # Hint: Make sure to preserve the order of examples as in the input.
-        yhat_T = 1.2345 * np.ones(T, dtype=np.float64) # TODO fixme
+        yhat_T = np.zeros(T, dtype=np.float64)
+        yhat_T[left_mask] = self.left_child.predict(x_TF[left_mask])
+        yhat_T[right_mask] = self.right_child.predict(x_TF[right_mask])
         return yhat_T
 
 
     def __str__(self):
         ''' Pretty print a string representation of this node
-        
+
         Returns
         -------
         s : string
@@ -139,7 +138,7 @@ class InternalDecisionNode(object):
 
 
 class LeafNode(object):
-    
+
     '''
     Defines a single node within a binary tree that makes constant predictions.
 
@@ -163,7 +162,7 @@ class LeafNode(object):
 
     def predict(self, x_TF):
         ''' Make prediction given provided feature array
-        
+
         For a leaf node, all input examples get the same predicted value,
         which is determined by the mean of the training set y values
         that reach this node.
@@ -181,17 +180,17 @@ class LeafNode(object):
         # TODO return one array with prediction determined by training set
         # Hint: Use this node's attribute "y_N", accessed by "self.y_N"
         # This is an array of all y values that reach this leaf in train set.
-        yhat_T = -1.2345 * np.ones(T) # TODO fixme
+        yhat_T = np.full(T, np.mean(self.y_N))
         return yhat_T
 
 
     def __str__(self):
         ''' Pretty print a string representation of this node
-        
+
         Returns
         -------
         s : string
-        '''        
+        '''
         return "Leaf: predict y = %.3f" % np.mean(self.y_N)
 
 
@@ -225,3 +224,51 @@ if __name__ == '__main__':
     print("Predictions of the right leaf for each example in training set:")
     yhat_N = right_leaf.predict(x_NF)
     print(np.round(yhat_N, 4))
+
+
+# 
+# N = 6
+# F = 1
+# x_NF = np.linspace(-5, 5, N).reshape((N,F))
+# y_N = np.hstack([np.linspace(0, 1, N//2), np.linspace(-1, 0, N//2)])
+#
+# feat_id = 0
+# thresh_val = 0.0
+# left_mask_N = x_NF[:, feat_id] < thresh_val
+# right_mask_N = np.logical_not(left_mask_N)
+# left_leaf = LeafNode(x_NF[left_mask_N], y_N[left_mask_N])
+# right_leaf = LeafNode(x_NF[right_mask_N], y_N[right_mask_N])
+#
+# print(left_leaf.y_N)
+# # array([0. , 0.5, 1. ])
+#
+# root = InternalDecisionNode(x_NF, y_N, feat_id, thresh_val, left_leaf, right_leaf)
+#
+# # Display the tree
+# print(root)
+# # Decision: X[0] < 0.000?
+# #   Y: Leaf: predict y = 0.500
+# #   N: Leaf: predict y = -0.500
+#
+# # Remember the true label of each node in train set
+# print(y_N)
+# # array([ 0. ,  0.5,  1. , -1. , -0.5,  0. ])
+#
+# # Predictions of the whole 3-node tree for each example in training set
+# yhat_N = root.predict(x_NF)
+# print(np.round(yhat_N, 4))
+# # array([ 0.5,  0.5,  0.5, -0.5, -0.5, -0.5])
+#
+# # Predictions of the left leaf for each example in training set:
+# yhat_N = left_leaf.predict(x_NF)
+# print(np.round(yhat_N, 4))
+# # array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+#
+# # Predictions of the right leaf for each example in training set:
+# yhat_N = right_leaf.predict(x_NF)
+# print(np.round(yhat_N, 4))
+# # array([-0.5, -0.5, -0.5, -0.5, -0.5, -0.5])
+#
+# # Predictions for new input never seen before
+# print(np.round(root.predict(x_NF[::-1] + 1.23), 4))
+# # array([-0.5, -0.5, -0.5, -0.5,  0.5,  0.5])
