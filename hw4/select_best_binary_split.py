@@ -166,7 +166,7 @@ def select_best_binary_split(x_NF, y_N, MIN_SAMPLES_LEAF=1):
     right_cost = np.sum(np.square(y_R - np.mean(y_R)))
     assert np.allclose(cost_F[best_feat_id], left_cost + right_cost)
 
-    return (best_feat_id, best_thresh_val, x_LF, y_L, x_RF, y_R)
+    return (int(best_feat_id), best_thresh_val, x_LF, y_L, x_RF, y_R)
 
 
 
