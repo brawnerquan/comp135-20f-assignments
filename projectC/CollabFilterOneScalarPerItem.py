@@ -51,8 +51,8 @@ class CollabFilterOneScalarPerItem(AbstractBaseCollabFilterSGD):
         # TODO fix the lines below to have right dimensionality
         self.param_dict = dict(
             mu=ag_np.zeros(1),
-            b_per_user=ag_np.zeros(1),
-            c_per_item=ag_np.zeros(1),
+            b_per_user=ag_np.zeros(n_users),
+            c_per_item=ag_np.zeros(n_items),
             )
 
     def predict(self, user_id_N, item_id_N,
@@ -75,8 +75,26 @@ class CollabFilterOneScalarPerItem(AbstractBaseCollabFilterSGD):
             Entry n is for the n-th pair of user_id, item_id values provided.
         '''
         # TODO: Update with actual prediction logic
+        if mu is None:
+            mu = self.param_dict["mu"]
+        else:
+            mu = ag_np.array(mu)
+
+        if b_per_user is None:
+            b_per_user = self.param_dict["b_per_user"]
+        else:
+            b_per_user = ag_np.array(b_per_user)
+
+        if c_per_item is None:
+            c_per_item = self.param_dict["c_per_item"]
+        else:
+            c_per_item = ag_np.array(c_per_item)
+
+        
         N = user_id_N.size
-        yhat_N = ag_np.ones(N)
+        
+        yhat_N = mu + ag_np.array(b_per_user[user_id_N]) + ag_np.array(c_per_item[item_id_N])
+        
         return yhat_N
 
     def calc_loss_wrt_parameter_dict(self, param_dict, data_tuple):
@@ -94,9 +112,10 @@ class CollabFilterOneScalarPerItem(AbstractBaseCollabFilterSGD):
         '''
         # TODO compute loss
         # TIP: use self.alpha to access regularization strength
+        
         y_N = data_tuple[2]
         yhat_N = self.predict(data_tuple[0], data_tuple[1], **param_dict)
-        loss_total = 0.0
+        loss_total = ag_np.sum( (ag_np.array(y_N) - yhat_N)**2  ) + self.alpha * (param_dict["mu"]**2 + ag_np.sum(param_dict["b_per_user"]**2) + ag_np.sum(param_dict["c_per_item"]**2))
         return loss_total
     
 

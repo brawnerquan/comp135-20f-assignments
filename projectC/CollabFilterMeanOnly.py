@@ -16,8 +16,8 @@ from AbstractBaseCollabFilterSGD import AbstractBaseCollabFilterSGD
 from train_valid_test_loader import load_train_valid_test_datasets
 
 # Some packages you might need (uncomment as necessary)
-## import pandas as pd
-## import matplotlib
+import pandas as pd
+import matplotlib.pyplot as plt
 
 # No other imports specific to ML (e.g. scikit) needed!
 
@@ -69,7 +69,10 @@ class CollabFilterMeanOnly(AbstractBaseCollabFilterSGD):
         '''
         # TODO: Update with actual prediction logic
         N = user_id_N.size
-        yhat_N = ag_np.ones(N)
+        if mu is None:
+            yhat_N = ag_np.ones(N) * self.param_dict["mu"]
+        else:
+            yhat_N = ag_np.ones(N) * ag_np.array(mu)
         return yhat_N
 
     def calc_loss_wrt_parameter_dict(self, param_dict, data_tuple):
@@ -88,10 +91,13 @@ class CollabFilterMeanOnly(AbstractBaseCollabFilterSGD):
         # TODO compute loss
         y_N = data_tuple[2]
         yhat_N = self.predict(data_tuple[0], data_tuple[1], **param_dict)
-        loss_total = 0.0
+        
+        loss_total = ag_np.sum(  ( ag_np.array(y_N) - yhat_N ) **2 )
+        
         return loss_total
 
-    
+
+
 
 if __name__ == '__main__':
 
@@ -101,9 +107,36 @@ if __name__ == '__main__':
     # Create the model and initialize its parameters
     # to have right scale as the dataset (right num users and items)
     model = CollabFilterMeanOnly(
-        n_epochs=10, batch_size=10000, step_size=0.1)
+        n_epochs=10, batch_size=100, step_size=0.1)
     model.init_parameter_dict(n_users, n_items, train_tuple)
 
     # Fit the model with SGD
     model.fit(train_tuple, valid_tuple)
 
+    plt.plot(model.trace_epoch, model.trace_mae_train, c='r', label="training")
+    plt.plot(model.trace_epoch, model.trace_mae_valid, c='b', label="validation")
+    plt.legend()
+
+    plt.title("Mean Absolute Error V.S. Epochs using 10000 batch size for Model M1: Predict Mean Only")
+
+    idx100 = 19
+    idx10k = 14
+    
+    idx = idx10k
+    y_idx = max( max(model.trace_mae_train[idx:]), max(model.trace_mae_valid[idx:]) )
+    y_min = min( min(model.trace_mae_train[idx:]), min(model.trace_mae_valid[idx:]) )
+
+    print(y_min, y_idx)
+    
+    plt.ylim((y_min, y_idx))
+
+    plt.xlabel("Epochs")
+    plt.ylabel("Mean Absolute Error")
+    plt.show()
+    
+    import numpy as np
+    print(np.mean(train_tuple[2]))
+    print(model.param_dict['mu'])
+
+
+    
