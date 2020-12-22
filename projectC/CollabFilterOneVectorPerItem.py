@@ -139,7 +139,7 @@ class CollabFilterOneVectorPerItem(AbstractBaseCollabFilterSGD):
         U = ag_np.array(param_dict["U"])
         V = ag_np.array(param_dict["V"])
 
-        loss_total = ag_np.sum( ( ag_np.array(y_N) - yhat_N) **2 ) # + self.alpha * (ag_np.sum(U**2) +  ag_np.sum(V**2))
+        loss_total = ag_np.sum( ( ag_np.array(y_N) - yhat_N) **2 )  + self.alpha * (ag_np.sum(U**2) +  ag_np.sum(V**2))
 
         return loss_total
 
@@ -152,141 +152,17 @@ if __name__ == '__main__':
     # Create the model and initialize its parameters
     # to have right scale as the dataset (right num users and items)
     model = CollabFilterOneVectorPerItem(
-        n_epochs=200, batch_size=10000, step_size=.9,
-        n_factors=50, alpha=0.1)
+        n_epochs=200, batch_size=1000, step_size=.9,
+        n_factors=2, alpha=0.05)
     model.init_parameter_dict(n_users, n_items, train_tuple)
     # Fit the model with SGD
     model.fit(train_tuple, valid_tuple)
 
-    plt.plot(model.trace_epoch, model.trace_mae_train, c='r', label="training")
-    plt.plot(model.trace_epoch, model.trace_mae_valid, c='b', label="validation")
-    plt.legend()
-
-    plt.title("Mean Absolute Error V.S. Epochs, a=0.1, K=50")
-
-    idx100 = 19
-    idx10k = 14
-
-    idx = idx10k
-    y_idx = max( max(model.trace_mae_train[idx:]), max(model.trace_mae_valid[idx:]) )
-    y_min = min( min(model.trace_mae_train[idx:]), min(model.trace_mae_valid[idx:]) )
-
-    print(y_min, y_idx)
-
-    # plt.ylim((y_min, y_idx))
-
-    plt.xlabel("Epochs")
-    plt.ylabel("Mean Absolute Error")
-    plt.show()
-
-    model = CollabFilterOneVectorPerItem(
-        n_epochs=200, batch_size=10000, step_size=.9,
-        n_factors=50, alpha=0.5)
-    model.init_parameter_dict(n_users, n_items, train_tuple)
-    # Fit the model with SGD
-    model.fit(train_tuple, valid_tuple)
-
-    plt.plot(model.trace_epoch, model.trace_mae_train, c='r', label="training")
-    plt.plot(model.trace_epoch, model.trace_mae_valid, c='b', label="validation")
-    plt.legend()
-
-    plt.title("Mean Absolute Error V.S. Epochs, a=0.5, K=50")
-
-    idx100 = 19
-    idx10k = 14
-
-    idx = idx10k
-    y_idx = max( max(model.trace_mae_train[idx:]), max(model.trace_mae_valid[idx:]) )
-    y_min = min( min(model.trace_mae_train[idx:]), min(model.trace_mae_valid[idx:]) )
-
-    print(y_min, y_idx)
-
-    # plt.ylim((y_min, y_idx))
-
-    plt.xlabel("Epochs")
-    plt.ylabel("Mean Absolute Error")
-    plt.show()
-
-    model = CollabFilterOneVectorPerItem(
-        n_epochs=200, batch_size=10000, step_size=.9,
-        n_factors=50, alpha=0.01)
-    model.init_parameter_dict(n_users, n_items, train_tuple)
-    # Fit the model with SGD
-    model.fit(train_tuple, valid_tuple)
-
-    plt.plot(model.trace_epoch, model.trace_mae_train, c='r', label="training")
-    plt.plot(model.trace_epoch, model.trace_mae_valid, c='b', label="validation")
-    plt.legend()
-
-    plt.title("Mean Absolute Error V.S. Epochs, a=0.01, K=50")
-
-    idx100 = 19
-    idx10k = 14
-
-    idx = idx10k
-    y_idx = max( max(model.trace_mae_train[idx:]), max(model.trace_mae_valid[idx:]) )
-    y_min = min( min(model.trace_mae_train[idx:]), min(model.trace_mae_valid[idx:]) )
-
-    print(y_min, y_idx)
-
-    # plt.ylim((y_min, y_idx))
-
-    plt.xlabel("Epochs")
-    plt.ylabel("Mean Absolute Error")
-    plt.show()
-
-    model = CollabFilterOneVectorPerItem(
-        n_epochs=200, batch_size=10000, step_size=.9,
-        n_factors=50, alpha=0.05)
-    model.init_parameter_dict(n_users, n_items, train_tuple)
-    # Fit the model with SGD
-    model.fit(train_tuple, valid_tuple)
-
-    plt.plot(model.trace_epoch, model.trace_mae_train, c='r', label="training")
-    plt.plot(model.trace_epoch, model.trace_mae_valid, c='b', label="validation")
-    plt.legend()
-
-    plt.title("Mean Absolute Error V.S. Epochs, a=0.05, K=50")
-
-    idx100 = 19
-    idx10k = 14
-
-    idx = idx10k
-    y_idx = max( max(model.trace_mae_train[idx:]), max(model.trace_mae_valid[idx:]) )
-    y_min = min( min(model.trace_mae_train[idx:]), min(model.trace_mae_valid[idx:]) )
-
-    print(y_min, y_idx)
-
-    # plt.ylim((y_min, y_idx))
-
-    plt.xlabel("Epochs")
-    plt.ylabel("Mean Absolute Error")
-    plt.show()
-
-    model = CollabFilterOneVectorPerItem(
-        n_epochs=200, batch_size=10000, step_size=.9,
-        n_factors=50, alpha=1)
-    model.init_parameter_dict(n_users, n_items, train_tuple)
-    # Fit the model with SGD
-    model.fit(train_tuple, valid_tuple)
-
-    plt.plot(model.trace_epoch, model.trace_mae_train, c='r', label="training")
-    plt.plot(model.trace_epoch, model.trace_mae_valid, c='b', label="validation")
-    plt.legend()
-
-    plt.title("Mean Absolute Error V.S. Epochs, a=1, K=50")
-
-    idx100 = 19
-    idx10k = 14
-
-    idx = idx10k
-    y_idx = max( max(model.trace_mae_train[idx:]), max(model.trace_mae_valid[idx:]) )
-    y_min = min( min(model.trace_mae_train[idx:]), min(model.trace_mae_valid[idx:]) )
-
-    print(y_min, y_idx)
-
-    # plt.ylim((y_min, y_idx))
-
-    plt.xlabel("Epochs")
-    plt.ylabel("Mean Absolute Error")
+    df_movies = pd.read_csv('data_movie_lens_100k/select_movies.csv')[['item_id', 'title']].to_numpy()
+    b = 0.0005
+    for row in df_movies:
+        pos = model.param_dict['V'][row[0]]
+        plt.plot(pos[0], pos[1], 'k.', mew=5)
+        plt.text(pos[0] + b, pos[1] + b, row[1], rotation = 17)
+    plt.autoscale()
     plt.show()
